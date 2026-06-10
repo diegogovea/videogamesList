@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Videogames List</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-left">
+      <span class="logo">🎮</span>
+      <h1>My Videogames List</h1>
+    </div>
+    <button class="btn-primary" id="btn-add">+ Add Game</button>
+  </header>
+
+  <!-- TOOLBAR: busqueda, filtros, toggle vista -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <input type="text" id="search-input" placeholder="Search by name..." class="search-input" />
+
+      <select id="filter-status" class="filter-select">
+        <option value="">All status</option>
+        <option value="backlog">Backlog</option>
+        <option value="playing">Playing</option>
+        <option value="completed">Completed</option>
+        <option value="abandoned">Abandoned</option>
+      </select>
+
+      <select id="filter-platform" class="filter-select">
+        <option value="">All platforms</option>
+      </select>
+    </div>
+
+    <div class="toolbar-right">
+      <span class="view-count" id="view-count">0 games</span>
+      <button class="view-toggle active" id="btn-grid" title="Grid view">⊞</button>
+      <button class="view-toggle" id="btn-list" title="List view">☰</button>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="main-content">
+    <!-- Vista Grid -->
+    <div id="grid-view" class="grid-view"></div>
+
+    <!-- Vista Lista -->
+    <div id="list-view" class="list-view hidden">
+      <table class="games-table">
+        <thead>
+          <tr>
+            <th>Cover</th>
+            <th>Name</th>
+            <th>Platform</th>
+            <th>Status</th>
+            <th>Rating</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Estado vacio -->
+    <div id="empty-state" class="empty-state hidden">
+      <span class="empty-icon">🕹️</span>
+      <p>No games found. Add your first game!</p>
+    </div>
+  </main>
+
+  <!-- MODAL: Agregar / Editar juego -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Game</h2>
+        <button class="modal-close" id="btn-close-modal">&times;</button>
+      </div>
+
+      <form id="game-form" class="game-form">
+        <input type="hidden" id="form-id" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="form-name">Name *</label>
+            <input type="text" id="form-name" placeholder="e.g. The Witcher 3" required />
+          </div>
+          <div class="form-group">
+            <label for="form-platform">Platform *</label>
+            <input type="text" id="form-platform" placeholder="e.g. PC, PS5, Switch" required list="platform-suggestions" />
+            <datalist id="platform-suggestions">
+              <option value="PC">
+              <option value="PS5">
+              <option value="PS4">
+              <option value="Xbox Series X">
+              <option value="Xbox One">
+              <option value="Nintendo Switch">
+              <option value="Steam Deck">
+              <option value="Mobile">
+            </datalist>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="form-status">Status *</label>
+            <select id="form-status" required>
+              <option value="backlog">Backlog</option>
+              <option value="playing">Playing</option>
+              <option value="completed">Completed</option>
+              <option value="abandoned">Abandoned</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="form-rating">Rating (1–10)</label>
+            <div class="rating-wrapper">
+              <input type="range" id="form-rating" min="1" max="10" value="5" />
+              <span id="rating-display">5</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="form-start-date">Start Date</label>
+            <input type="date" id="form-start-date" />
+          </div>
+          <div class="form-group">
+            <label for="form-end-date">End Date</label>
+            <input type="date" id="form-end-date" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="form-comment">Comment</label>
+          <textarea id="form-comment" rows="3" placeholder="Your thoughts, notes..."></textarea>
+        </div>
+
+        <!-- Imagen -->
+        <div class="form-group">
+          <label>Cover / Screenshot</label>
+          <div class="image-input-tabs">
+            <button type="button" class="tab-btn active" id="tab-url">URL</button>
+            <button type="button" class="tab-btn" id="tab-file">Upload file</button>
+          </div>
+          <div id="image-url-panel">
+            <input type="url" id="form-image-url" placeholder="https://..." />
+          </div>
+          <div id="image-file-panel" class="hidden">
+            <input type="file" id="form-image-file" accept="image/*" />
+          </div>
+          <div id="image-preview-wrapper" class="hidden">
+            <img id="image-preview" src="" alt="Preview" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="btn-cancel">Cancel</button>
+          <button type="submit" class="btn-primary" id="btn-submit">Save Game</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Ver detalle del juego -->
+  <div id="detail-overlay" class="modal-overlay hidden">
+    <div class="modal modal-detail">
+      <button class="modal-close" id="btn-close-detail">&times;</button>
+      <div id="detail-content"></div>
+      <div class="detail-actions">
+        <button class="btn-secondary" id="btn-edit-detail">Edit</button>
+        <button class="btn-danger" id="btn-delete-detail">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
